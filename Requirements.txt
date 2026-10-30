@@ -1,0 +1,11 @@
+these are rules to be always followed:
+- ALWAYS be simple, keep code simple and follow the best and simplest architecture and code organization.
+- never assume things, always you can ask questions. and never do something that wasn't required, you have to implement EXACTLY what I ask for, and follow EXACTLY and LITERALLY what I say, if confused, ask questions.
+- DON'T mess with any file, code, anything that isn't related to the task that I ask you for, change ONLY things to achieve the purpose I ask for, nothing more, nothing less.
+end of rules.
+
+- I want to create a web application using streamlit to play the role of a dashboard showing the predictions of a machine learning model trained on the data present in the current folder "encaissement du 01-01-2026.xls" in the form of line graphs overtime.
+- the data represents the payment history of clients using online and cash payment method, and the model needs to predict the payment behavior of clients in both methods, like show a graph where the x-axis is date and futurely, here's how we predict the online payment will be, and another graph showing how the cash payment will be, and other comparison graphs if possible (any useful thing is recommended).
+- the current folder should include three things next to the data file: a .ipynb file that explores the data, cleans it, visualize it, extract insights, train many models, compare them with evaluation, choose the best model, save it as a pkl in the current folder.
+- and a folder for the steamlit web app (frontend + backend) that uses the trained model to do predictions.
+- use fastapi for the backend.

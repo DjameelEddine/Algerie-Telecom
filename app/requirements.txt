@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+streamlit
+pandas
+openpyxl
+scikit-learn
+matplotlib
+requests

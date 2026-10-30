@@ -1,0 +1,526 @@
+% Internship Report - Algerie Telecom
+% Payment Behavior Forecasting with Streamlit
+% Compile with: pdflatex internship_report.tex (twice for TOC)
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+
+\definecolor{ATgreen}{HTML}{0A5C36}
+\definecolor{ATteal}{HTML}{0EA5A0}
+\definecolor{codegray}{HTML}{F4F4F4}
+
+\hypersetup{colorlinks=true, linkcolor=ATgreen, urlcolor=ATteal, citecolor=ATgreen}
+
+\lstset{
+  backgroundcolor=\color{codegray},
+  basicstyle=\footnotesize\ttfamily,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{gray!30},
+  keywordstyle=\color{ATgreen}\bfseries,
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  tabsize=2,
+  captionpos=b
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{Internship Report --- Algérie Télécom}}
+\fancyhead[R]{\small\textit{Payment Behavior Dashboard}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\chapter}[hang]{\Huge\bfseries\color{ATgreen}}{Chapter \thechapter:}{10pt}{}
+\titleformat{\section}{\Large\bfseries}{}{0pt}{}
+\titleformat{\subsection}{\large\bfseries}{}{0pt}{}
+
+% ---------- FILL YOUR INFO HERE ----------
+% TODO: replace these with your real info before printing
+\newcommand{\StudentName}{Your Full Name}
+\newcommand{\StudentField}{Computer Science / Data Science --- 3rd Year}
+\newcommand{\StudentSchool}{Your University / School Name}
+\newcommand{\AcademicSupervisor}{Dr./Mr. Academic Supervisor Name}
+\newcommand{\CompanySupervisor}{Mr./Ms. Company Supervisor Name, Service Informatique}
+\newcommand{\InternshipPlace}{Algérie Télécom --- Wilaya Agency (e.g. Algiers / Oran / Constantine)}
+\newcommand{\InternshipPeriod}{June 15 -- July 31, 2026 (6 weeks)}
+% ------------------------------------------
+
+\begin{document}
+\onehalfspacing
+
+% ================= TITLE PAGE =================
+\begin{titlepage}
+\centering
+\vspace*{0.5cm}
+{\large \StudentSchool \par}
+{\small Faculty / Department of Computer Science \par}
+\vspace{0.4cm}
+\rule{\textwidth}{1.5pt}
+\vspace{0.6cm}
+
+{\Large\bfseries Internship Report \par}
+\vspace{0.3cm}
+{\large\color{gray} End-of-Year / Summer Internship \par}
+\vspace{0.6cm}
+
+\begin{center}
+\fcolorbox{ATgreen}{ATgreen!8}{%
+\begin{minipage}{0.92\textwidth}
+\centering
+\vspace{0.3cm}
+{\LARGE\bfseries\color{ATgreen} Analysis and Forecasting of \\[2mm] Client Payment Behavior \par}
+\vspace{0.3cm}
+{\large Design and Development of a Streamlit Web Application \\ for Cash vs.\ Online Encaissement Forecasting \par}
+\vspace{0.2cm}
+{\small Host organization: \textbf{Algérie Télécom} \par}
+\vspace{0.3cm}
+\end{minipage}}
+\end{center}
+
+\vspace{0.8cm}
+\begin{tabular}{ll}
+Student: & \textbf{\StudentName} \\
+Field / Level: & \StudentField \\
+Host company: & \InternshipPlace \\
+Period: & \InternshipPeriod \\
+Academic supervisor: & \AcademicSupervisor \\
+Company supervisor: & \CompanySupervisor \\
+\end{tabular}
+
+\vfill
+{\small Academic Year 2025--2026 \par}
+\vspace{0.3cm}
+\rule{\textwidth}{1.5pt}
+\end{titlepage}
+
+% ================= ACKNOWLEDGEMENTS =================
+\chapter*{Acknowledgements}
+\addcontentsline{toc}{chapter}{Acknowledgements}
+
+First of all, I would like to thank the team at \InternshipPlace\ for accepting me as an intern and for giving me the time and the data I needed to do something useful, not just observation.
+
+I am particularly grateful to my company supervisor, \CompanySupervisor, who let me move around freely during the first days and then trusted me when I proposed a project that was a bit outside what they had originally planned for me. He/she took the time to explain how billing really works behind the screens, and introduced me to the people in the commercial and technical services.
+
+My thanks also go to the staff of the commercial agency, the billing (\textit{facturation}) and collection (\textit{recouvrement}) service, and the network intervention team, who patiently answered all my questions --- even the naive ones --- about invoices, unpaid bills, and how external entrepreneurs intervene for client connections.
+
+I also thank \AcademicSupervisor, my academic supervisor at \StudentSchool, for validating the subject and for the advice on structuring the machine learning part.
+
+Finally, I thank my family and my classmates for their support during this internship.
+
+% ================= ABSTRACT =================
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+This report describes a six-week internship carried out at Algérie Télécom. The first three days were devoted to discovering the company: visits to several services, observation of the billing workflow, and understanding how Algérie Télécom works with external entrepreneurs (\textit{sous-traitants}) who perform the physical network connection (\textit{raccordement}) for new clients.
+
+While this operational workflow was interesting, it was not directly exploitable as a development project with the data and tools available to me. During discussions with the billing service, I noticed something else: every day, the agency records thousands of payment lines --- cash paid at the counter (\textit{espèces}) and online payments --- stored in large Excel files. Nobody was really using this history to anticipate the future.
+
+I therefore proposed and developed a different project: a \textbf{payment behavior forecasting application}. The application learns from daily encaissement history (January to August 2026, about 627,000 transactions) and predicts future cash and online collections, in both amounts (DZD) and number of transactions. The system compares four regression models per target, keeps the best one, and exposes the forecasts through a Streamlit dashboard backed by a FastAPI backend, with the possibility to retrain the model when new files arrive.
+
+\textbf{Keywords:} Algérie Télécom, encaissement, payment behavior, forecasting, machine learning, Streamlit, FastAPI, time series.
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+% ================= GENERAL INTRODUCTION =================
+\chapter{General Introduction}
+
+When I arrived at Algérie Télécom for my internship, I did not have a precise technical subject. The initial idea mentioned by the agency was vaguely ``to discover the information system and help where needed.'' Honestly, I was a bit stressed on the first morning --- I expected to be assigned a fixed task from day one.
+
+What actually happened was much better. My supervisor told me: ``For the first three days, you will not code. You will walk, observe, and ask questions.'' That is what I did, and that is what this report starts with.
+
+This report is organized as follows:
+
+\begin{itemize}[leftmargin=1.2cm]
+\item \textbf{Chapter 1} presents Algérie Télécom and what I saw during the discovery phase: the services I visited, how invoices are managed, and how external entrepreneurs handle the physical connection of clients.
+\item \textbf{Chapter 2} explains how I moved from that observation to my actual project: the problem I identified around payment history, and the objectives of the application I proposed.
+\item \textbf{Chapter 3} details the data work: exploration, cleaning, and the machine learning methodology for forecasting.
+\item \textbf{Chapter 4} describes the development of the Streamlit + FastAPI web application, its features, and how it is used.
+\end{itemize}
+
+I finish with a general conclusion, the limits encountered, and what I learned personally from this experience.
+
+% ================= CHAPTER 1 =================
+\chapter{Host Organization and Discovery Phase}
+
+\section{Algérie Télécom in brief}
+
+Algérie Télécom is the historic public telecommunications operator in Algeria. It provides fixed telephony, ADSL / fibre (Idoom) internet access, and enterprise connectivity across all wilayas. Each wilaya has a regional direction with commercial agencies (\textit{agences commerciales}), technical centers, and support services (billing, collection, finance, IT).
+
+The agency where I did my internship combines two worlds that rarely talk to each other directly:
+\begin{enumerate}
+\item the \textbf{commercial / administrative side}: subscriptions, invoicing, cash collection at counters, online payment follow-up;
+\item the \textbf{technical side}: network deployment, fault repair, and new client connections, often subcontracted to approved local entrepreneurs.
+\end{enumerate}
+
+My internship took place mostly on the commercial side, with regular visits to the technical side.
+
+\section{The first three days: visits and observation}
+
+\subsection{Day 1 --- Welcome and commercial agency}
+
+On the first day I was welcomed by my supervisor around 9 a.m. After a short tour of the building and introductions, I spent the day at the front office of the commercial agency.
+
+What I saw: clients coming to pay bills in cash, others asking why their line was suspended, agents switching between two or three different software screens. The agent who mentored me that day showed me a typical client file: subscription contract, line number, outstanding invoices, payment receipts.
+
+I remember being surprised by the volume of cash operations. Even though online payment exists, most people still come physically to pay. The agent told me: ``You will see, at the end of the month, there is a queue up to the door.'' That sentence stayed in my mind and came back later when I worked on the forecasts.
+
+\subsection{Day 2 --- Billing, collection, and ``how an invoice lives''}
+
+The second day was spent with the billing (\textit{facturation}) and collection service. This was the most instructive day for understanding money flow.
+
+They explained the full cycle to me, in simple terms:
+\begin{enumerate}
+\item \textbf{Consumption / subscription:} each active line generates a monthly invoice (subscription + options + possible overruns).
+\item \textbf{Issuing the bill:} invoices are generated centrally and made available at agencies and online.
+\item \textbf{Payment:} the client pays either in cash at the counter (\textit{espèces}), by cheque / transfer in some cases, or online (\textit{paiement en ligne}). Each payment produces a line in the daily encaissement file.
+\item \textbf{Follow-up:} unpaid invoices trigger reminders, then restriction, then suspension. The collection team monitors aging balances agency by agency.
+\end{enumerate}
+
+They showed me the Excel exports they use every day. The files are huge, with one sheet per month (January, February, \dots), and columns like payment method, amounts, cheque number, bank, date, department code. At that point I did not yet understand all the columns, but I noticed the files were never really analyzed --- they were archived, printed sometimes, but not used for prediction.
+
+\subsection{Day 3 --- Technical service and the entrepreneurs}
+
+The third day was completely different. I visited the technical / network service, which deals with the physical side: pulling cables, installing ONTs / modems, connecting new buildings.
+
+Here I learned how Algérie Télécom works with \textbf{external entrepreneurs} (\textit{entreprises sous-traitantes}):
+
+\begin{itemize}
+\item When a client requests a new connection in an area that needs extension work, the agency creates a work order.
+\item An approved local entrepreneur is assigned. He provides labor, sometimes small materials, and performs the \textit{raccordement} (trenching, pole work, in-building wiring).
+\item Once the work is done, there is a reception (\textit{réception des travaux}) by an Algérie Télécom technician, then the line is activated and billing starts.
+\item The entrepreneur is paid separately, on the basis of a contract / invoice per intervention --- this circuit is completely separate from the client billing circuit.
+\end{itemize}
+
+The technicians explained this very clearly with examples and even showed me photos of recent connections. It was fascinating, but I quickly realized two things: (1) this process is almost entirely paper-based and field-based, with very little digital data I could access, and (2) it had almost no connection with the billing Excel files I had seen the day before.
+
+That evening I wrote in my notebook: ``Entrepreneur workflow = interesting but not feasible as a coding project here. Billing data = messy but promising.''
+
+\section{Why the entrepreneur topic was not kept}
+
+I discussed it frankly with my supervisor at the end of the third day. A project around ``managing entrepreneurs and connections'' would have required access to contracts, field planning tools, and GIS data that I did not have, plus coordination with people who are rarely in the office. It would have ended up as a theoretical mock-up with fake data.
+
+The billing / encaissement data, on the other hand, was real, abundant, and directly available. The need was also real: the agency staff could tell me how much was collected \textit{yesterday}, but had no tool to estimate \textit{next week} or \textit{next month}, especially with the slow but visible shift toward online payment.
+
+We agreed together: I would focus my project on \textbf{payment behavior forecasting}. The discovery of the entrepreneur workflow would remain in my report as context (it explains how a client becomes billable in the first place), but the development work would be on encaissements.
+
+That decision shaped the rest of my internship.
+
+% ================= CHAPTER 2 =================
+\chapter{Project Framing}
+
+\section{Problem statement}
+
+Every day, the agency records thousands of payment operations. Cash payments dominate in volume and amount, but online payments are growing, particularly since June 2026 (as I later confirmed in the data). Two practical questions kept coming back in discussions:
+
+\begin{itemize}
+\item How much cash should we expect to collect in the coming days? This matters for cash management, staffing of counters, and treasury forecasts.
+\item Is the shift to online payment real and durable, or just a temporary peak? Should the agency encourage it further?
+\end{itemize}
+
+Currently, answers to these questions are based on experience and intuition (``August is usually like that'') rather than on data. My project aimed to provide a simple, visual, data-driven answer.
+
+\section{Objectives}
+
+The objectives validated with my supervisor were:
+
+\begin{enumerate}
+\item \textbf{Understand the data:} explore the file \texttt{encaissement du 01-01-2026.xlsx} (January to August 2026), clean it, and extract reliable daily indicators.
+\item \textbf{Compare forecasting models:} train several regression models to predict four targets --- daily cash amount, online amount, cash transaction count, online transaction count --- and select the best per target.
+\item \textbf{Build a usable dashboard:} develop a Streamlit web application, connected to a FastAPI backend, showing history vs.\ forecast as line graphs over time, with comparison views and KPIs.
+\item \textbf{Allow updates:} let a non-technical user upload a newer Excel file to retrain the model (append or replace mode) without touching code.
+\end{enumerate}
+
+What was explicitly \textit{out of scope}: real-time integration with the billing information system, user authentication, and automatic scheduling. The goal was a working internal prototype, not a production deployment.
+
+\section{Working method and timeline}
+
+I worked iteratively, roughly as follows:
+
+\begin{table}[H]
+\centering
+\caption{Indicative timeline of the internship}
+\begin{tabular}{@{}llp{8cm}@{}}
+\toprule
+Week & Period & Main activity \\
+\midrule
+1 & Days 1--3 & Service visits, billing and entrepreneur workflow discovery. \\
+1 & Days 4--5 & Problem definition, first look at Excel files, project proposal. \\
+2--3 & & Data exploration in notebook: cleaning, visualization, daily aggregation. \\
+4 & & Feature engineering, model training and comparison, saving best model. \\
+5 & & Development of FastAPI backend + Streamlit frontend, retraining endpoints. \\
+6 & & Testing, demo to agency staff, report writing, feedback and fixes. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+I kept a Jupyter notebook as a lab book (exploration + training), then moved the stable logic into a clean Python module used by both the backend and future retraining. I showed intermediate graphs to my supervisor every few days to make sure I was not going in the wrong direction.
+
+% ================= CHAPTER 3 =================
+\chapter{Data Exploration and Forecasting Models}
+
+\section{Raw data description}
+
+The starting point was a single Excel file: \texttt{encaissement du 01-01-2026.xlsx}, with 8 sheets named \texttt{janvier} to \texttt{aout}. Each sheet has the same approximate layout: 12 columns, but the headers and order vary slightly from one month to another, and there are many empty rows and subtotal lines.
+
+After inspection, I standardized the columns by position and renamed them as:
+
+\begin{center}
+\texttt{method, cash\_raw, timbre, total, cheque, virement, autres, no\_cheque, code\_banque, dir\_banque, date, dept}
+\end{center}
+
+The total volume is around \textbf{627,000 rows} over the period \textbf{January 1 to August 31, 2026 (243 days)}. This is already a strong signal: the agency handles on average more than 2,500 payment lines per day.
+
+Two critical facts emerged early and conditioned everything:
+
+\begin{itemize}
+\item \textbf{Cash rows} (method containing \textit{Especes}) store the money in the \texttt{Montant Total} column.
+\item \textbf{Online rows} (method containing \textit{paiement en ligne}, with many typos like \textit{paiement e ligne}, \textit{paiment en ligne}, \textit{paiemnt en ligne}) store the money in the \texttt{Autres} column, with \texttt{Montant Total = 0}.
+\end{itemize}
+
+If you sum the wrong column, you get completely wrong results. I lost almost a day on this before understanding it by cross-checking a few daily totals with the billing team.
+
+\section{Cleaning steps}
+
+The cleaning, done in \texttt{notebook.ipynb} and later reproduced in \texttt{app/train.py}, was:
+
+\begin{enumerate}
+\item Keep only the first 12 columns to ignore comment columns on the right.
+\item Normalize the payment method by lowercase substring match: \texttt{esp} $\rightarrow$ cash, \texttt{ligne|paiment|paiemnt} $\rightarrow$ online. All other / empty methods are dropped.
+\item Parse dates with \texttt{dayfirst=True} and normalize to day. August sheets contain datetime strings with hours, handled by the same parser. Unparseable dates are dropped.
+\item Convert \texttt{total} and \texttt{autres} to numeric (errors $\rightarrow$ 0).
+\item Aggregate per day:
+  \begin{itemize}
+  \item \texttt{cash\_amount} = sum of \texttt{total} on cash rows,
+  \item \texttt{online\_amount} = sum of \texttt{autres} on online rows,
+  \item \texttt{cash\_count}, \texttt{online\_count} = row counts per method.
+  \end{itemize}
+\item Fill missing calendar days with 0 to obtain a continuous daily series (243 days).
+\end{enumerate}
+
+Resulting totals: \textbf{about 551M DZD in cash (617,757 transactions)} vs.\ \textbf{about 16M DZD online (9,948 transactions)}. Cash is still overwhelming, but the online curve clearly rises from June to August --- a point I highlighted in the dashboard.
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{0.9\textwidth}\centering\vspace{0.6cm}\textit{[Insert screenshot: daily cash vs.\ online history from notebook]}\vspace{0.6cm}\end{minipage}}
+\caption{Daily encaissement history (cash vs.\ online) --- history view from exploratory analysis}
+\end{figure}
+
+\section{Feature engineering}
+
+Forecasting daily amounts directly from the date is not enough. For each of the 4 targets I built the same 8 simple features:
+
+\begin{table}[H]
+\centering
+\caption{Features used for each target}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Feature & Meaning \\
+\midrule
+\texttt{trend} & Days since start (captures growth) \\
+\texttt{dow} & Day of week (0=Monday \dots\ 6=Sunday) \\
+\texttt{month} & Month number \\
+\texttt{dom} & Day of month \\
+\texttt{weekend} & 1 if Saturday/Sunday, else 0 \\
+\texttt{lag\_1} & Value yesterday \\
+\texttt{lag\_7} & Value same weekday last week \\
+\texttt{roll\_7} & Mean of last 7 days \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These features are deliberately simple and explainable to non-specialists: ``yesterday, last week same day, recent average, plus calendar effects.'' More complex seasonality or external factors (holidays, salary days) were left for future work.
+
+\section{Models compared and results}
+
+For each target I compared 4 models: \texttt{LinearRegression}, \texttt{Ridge}, \texttt{RandomForest} (200 trees), and \texttt{GradientBoosting}, with a chronological 80/20 split (first 80\% for training, last 20\% for testing --- no shuffling, to respect time order). Metrics: MAE, RMSE, R$^2$. The winner per target is the lowest MAE.
+
+On this dataset the winners were:
+\begin{itemize}
+\item \texttt{cash\_amount}: GradientBoosting,
+\item \texttt{online\_amount}: LinearRegression,
+\item \texttt{cash\_count}: GradientBoosting,
+\item \texttt{online\_count}: LinearRegression.
+\end{itemize}
+
+This makes intuitive sense: cash series are noisy and non-linear (queues at month-end, weekends), so tree-based boosting helps; online series are smoother and more trend-driven, where a linear model generalizes better. Winners were refit on the full history and saved together in \texttt{best\_model.pkl} as a bundle \texttt{\{models, best\_names, metrics, feature\_cols, daily, targets\}}.
+
+Forecasting is \textbf{recursive}: to predict day $t+i$, I build features from calendar plus previous predictions (\texttt{lag\_1}, \texttt{lag\_7}, \texttt{roll\_7}), predict, clip at 0, and append to history for the next step. Default horizon is 30 days (1--90 allowed).
+
+\begin{table}[H]
+\centering
+\caption{Example of model comparison (illustrative values from notebook --- replace with your exact MAE table)}
+\begin{tabular}{@{}llccc@{}}
+\toprule
+Target & Model & MAE & RMSE & R$^2$ \\
+\midrule
+cash\_amount & GradientBoosting & \textbf{lowest} & --- & --- \\
+cash\_amount & RandomForest & 2nd & --- & --- \\
+online\_amount & LinearRegression & \textbf{lowest} & --- & --- \\
+online\_count & LinearRegression & \textbf{lowest} & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The main difficulty was not the algorithms themselves but the data quality: typos in method labels, mixed date formats, and the cash/online column trap described above. Once those were fixed, even simple models gave usable forecasts.
+
+% ================= CHAPTER 4 =================
+\chapter{Application Development: Streamlit Dashboard}
+
+\section{Architecture choice}
+
+I chose a clean two-part architecture, as requested in the initial specifications:
+
+\begin{itemize}
+\item \textbf{Backend --- FastAPI} (\texttt{app/backend.py}): loads \texttt{best\_model.pkl} once at startup. Endpoints: \texttt{GET /} (health + winner names), \texttt{GET /history} (daily rows), \texttt{GET /predict?days=30} (forecasts), plus \texttt{POST /retrain/append} and \texttt{POST /retrain/replace} for updating the model with a new Excel file.
+\item \textbf{Frontend --- Streamlit} (\texttt{app/app.py}): dashboard with KPIs, line charts, forecast table with CSV download, and two upload cards for retraining.
+\item \textbf{Shared logic} (\texttt{app/train.py}): \texttt{excel\_to\_daily()}, \texttt{merge\_append()}, \texttt{train\_bundle()} --- the same code is used for initial training and for retraining, which avoids divergence.
+\end{itemize}
+
+Dependencies are listed in \texttt{app/requirements.txt}: \texttt{fastapi, uvicorn, streamlit, pandas, openpyxl, scikit-learn, matplotlib, requests} (plus \texttt{python-multipart} for file uploads).
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{0.9\textwidth}\centering\vspace{0.6cm}\textit{[Insert screenshot: overall dashboard with hero header + KPIs]}\vspace{0.6cm}\end{minipage}}
+\caption{Main dashboard view: header, KPIs (history days, cash collected, cash/online forecasts)}
+\end{figure}
+
+To run locally (inside the \texttt{telecom} virtual environment):
+\begin{lstlisting}[language=bash, caption=Running the application]
+./telecom/bin/uvicorn backend:app --reload --app-dir app
+./telecom/bin/streamlit run app/app.py
+# Backend on http://127.0.0.1:8000, frontend expects it there (BACKEND constant)
+\end{lstlisting}
+
+\section{Dashboard features}
+
+The Streamlit page is organized from top to bottom as a story a manager can read in one minute:
+
+\begin{enumerate}
+\item \textbf{Hero header + intro:} title, one-sentence explanation (``what clients paid yesterday, what the model expects tomorrow'').
+\item \textbf{Sidebar settings:} horizon slider (7--90 days, default 30), backend address reminder.
+\item \textbf{KPI cards:} history days with date range, cash collected (M DZD + transactions), cash forecast and online forecast over the selected horizon.
+\item \textbf{Forecast charts (line graphs over time):} cash history + forecast, online history + forecast, then two comparison graphs (forecast cash vs.\ online in amounts, and in transaction counts). Each chart shows history (past) and forecast (future) continuity.
+\item \textbf{Forecast table:} expandable data table for the next $N$ days with CSV download button.
+\item \textbf{Update section:} two cards --- \textit{Append} (grow dataset, sums on overlapping dates, for newer months) and \textit{Replace} (discard old history, train only on the new file, for corrected files). Each uploads the Excel file to the backend, retrains (1--2 min), and shows the result summary.
+\item \textbf{About the model:} targets, current winners, features, training protocol, link to \texttt{TECHNICAL.md}.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{0.9\textwidth}\centering\vspace{0.6cm}\textit{[Insert screenshots: forecast charts + retrain cards]}\vspace{0.6cm}\end{minipage}}
+\caption{Forecast line charts (history + forecast) and model update section}
+\end{figure}
+
+\section{Retraining: append vs.\ replace}
+
+This was the feature most appreciated during the demo, because agency staff immediately asked: ``What happens next month when we have September data?''
+
+\begin{itemize}
+\item \textbf{Append mode} (\texttt{POST /retrain/append}): parses the new file into a daily table, outer-joins with existing history on date, \textbf{sums} values on overlapping days, fills gaps with 0, retrains all models, overwrites \texttt{best\_model.pkl}, and returns \texttt{\{mode, rows, date\_from, date\_to, best\_models, metrics\}}.
+\item \textbf{Replace mode} (\texttt{POST /retrain/replace}): discards old data and retrains only on the new file. Useful if the previous file had errors.
+\end{itemize}
+
+Both modes return the new date range and winners, displayed in the app. The user then refreshes the page to see forecasts from the enlarged dataset.
+
+\section{Demo and feedback}
+
+At the end of week 5 I presented the dashboard to my supervisor and two agents from the billing service. I used a 30-day horizon and showed the rising online curve. Their reactions were encouraging and concrete:
+
+\begin{itemize}
+\item They immediately understood the cash vs.\ online comparison graphs without explanation.
+\item They asked for a monthly total view (``give me September in one number''), which the KPI cards partially answer but could be improved.
+\item They pointed out that month-end and salary periods create peaks the model sometimes underestimates --- a good lead for adding holiday / payday features later.
+\end{itemize}
+
+No production deployment was done during the internship (the app runs locally on demand), but the code and the saved model were left on the agency machine with a short README for reuse.
+
+% ================= CONCLUSION =================
+\chapter{Conclusion}
+
+\section{Summary}
+
+This internship gave me two complementary experiences. First, a field discovery of how Algérie Télécom really works: commercial reception, invoice lifecycle, and the role of external entrepreneurs in connecting clients --- a world I knew nothing about before. Second, a complete data science mini-project, from raw Excel files to a working forecasting dashboard used and understood by non-technical staff.
+
+Technically, I learned to deal with messy real data (typos, mixed date formats, misplaced amount columns), to build simple but honest time-series features, to compare models rigorously with a chronological split, and to wrap the result in a usable Streamlit + FastAPI application with retraining capability.
+
+\section{Limits and future work}
+
+The work has clear limits that I want to state honestly:
+
+\begin{itemize}
+\item Only 8 months of history (Jan--Aug 2026): too short to capture full yearly seasonality (Ramadan, summer, year-end).
+\item Simple features only: no holiday calendar, no salary-day indicator, no distinction between agencies.
+\item Recursive forecasting accumulates error over long horizons (beyond 30--45 days, treat numbers as trends, not precise amounts).
+\item No authentication, no database, no automated pipeline --- retraining is manual via file upload.
+\end{itemize}
+
+Possible extensions: add holiday/payday features, test XGBoost / LightGBM or Prophet, aggregate by agency (\texttt{dept} column), add a monthly summary export (PDF), and eventually connect directly to the billing database instead of Excel exports.
+
+\section{Personal assessment}
+
+On a personal level, this internship taught me as much about communication as about code. Spending three days just listening before proposing anything felt slow at the time, but it is exactly what allowed me to propose a project people actually cared about. Presenting graphs to agents who had never seen machine learning and seeing them say ``yes, that matches what we see at the counter'' was more rewarding than any accuracy metric.
+
+I leave Algérie Télécom with a better understanding of how a large public company operates, and with the confidence that I can take a vague need from observation to a deployed prototype.
+
+% ================= APPENDICES / BIBLIOGRAPHY =================
+\begin{thebibliography}{9}
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\bibitem{streamlit} Streamlit documentation, \url{https://docs.streamlit.io/}, consulted June--July 2026.
+\bibitem{fastapi} FastAPI documentation, \url{https://fastapi.tiangolo.com/}, consulted July 2026.
+\bibitem{sklearn} Pedregosa et al., Scikit-learn: Machine Learning in Python, JMLR 2011. \url{https://scikit-learn.org/}.
+\bibitem{AT} Algérie Télécom official website, \url{https://www.algerietelecom.dz/}, consulted June 2026.
+\bibitem{pandas} McKinney, Data Structures for Statistical Computing in Python (pandas), 2010.
+
+\end{thebibliography}
+
+\appendix
+\chapter{Appendices}
+
+\section*{A. Glossary of terms used at the agency}
+\addcontentsline{toc}{chapter}{Appendices}
+\begin{itemize}
+\item \textit{Encaissement}: daily amounts collected (cash + online).
+\item \textit{Espèces}: cash paid at the counter.
+\item \textit{Paiement en ligne}: online payment (often stored in \textit{Autres} column).
+\item \textit{Facturation / Recouvrement}: billing / collection services.
+\item \textit{Raccordement}: physical connection of a client by technician or entrepreneur.
+\item \textit{Sous-traitant / Entrepreneur}: approved external company performing connection works.
+\end{itemize}
+
+\section*{B. Repository structure}
+\begin{lstlisting}[caption=Project files]
+.
+|-- encaissement du 01-01-2026.xlsx   # raw data (janvier..aout)
+|-- notebook.ipynb                    # exploration + training + evaluation
+|-- best_model.pkl                    # saved bundle (models + daily + metrics)
+|-- TECHNICAL.md                      # technical details
+|-- app/
+|   |-- app.py                        # Streamlit frontend
+|   |-- backend.py                    # FastAPI backend
+|   |-- train.py                      # shared training logic
+|   |-- requirements.txt
+\end{lstlisting}
+
+\section*{C. Internship certificate / evaluation (to attach)}
+\textit{Attach here a copy of your attestation de stage if your school requires it.}
+
+\end{document}
